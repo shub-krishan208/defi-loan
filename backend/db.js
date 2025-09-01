@@ -1,21 +1,42 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import Database from "better-sqlite3";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyAlyMqALSLyAhVVHV_9E9-I47oSF4Zysqc",
-  authDomain: "blockchain-loan-system.firebaseapp.com",
-  projectId: "blockchain-loan-system",
-  storageBucket: "blockchain-loan-system.firebasestorage.app",
-  messagingSenderId: "196733874017",
-  appId: "1:196733874017:web:16ae4fe5f1818a2eba1f20",
-  measurementId: "G-5ND3MSEZYZ",
-};
+const db = new Database("db.sqlite", { verbose: console.log });
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+// id (unique primary key), public_address, username (non unique), amount_approved, cibil, coll_path
+const createTable = db.prepare(`
+    CREATE TABLE IF NOT EXISTS ledger (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        public_address TEXT NOT NULL,
+        username TEXT NOT NULL,
+        amount_approved INTEGER NOT NULL,
+        cibil INTEGER NOT NULL,
+        coll_path TEXT NOT NULL
+    );
+`);
+
+createTable.run();
+
+function viewLedger() {
+  const stmt = db.prepare("SELECT * FROM ledger");
+  return stmt.all();
+}
+
+function findUser(user) {
+  const stmt = db.prepare("SELECT * FROM ledger WHERE username = ?");
+  return stmt.get(user);
+}
+
+function findColl(path) {
+  const stmt = db.prepare("SELECT * FROM ledger WHERE coll_path = ?");
+  return stmt.get(path);
+}
+
+function addEntry(pid, user, amt, cibil, path) {
+  const stmt = db.prepare(
+    `INSERT INTO users (public_address, username, amoutn_approved, cibil, coll_path) VALUES (?,?,?,?,?)`
+  );
+  const info = stmt.run(pid, user, amt, cibil, path);
+  console.log(`New Loan added with loan id "${info.lastInsertRowid}"`);
+}
+
+export { findUser, addEntry, viewLedger };

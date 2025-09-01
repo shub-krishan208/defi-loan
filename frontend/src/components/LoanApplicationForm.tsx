@@ -1,11 +1,17 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { FileUp, DollarSign, Shield } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { FileUp, DollarSign, Shield } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface LoanApplicationFormProps {
   walletAddress: string;
@@ -19,23 +25,26 @@ interface LoanData {
   maxLoanAmount?: number;
   minimumCollateral?: number;
   collateralValue?: number;
-  loanStatus?: 'pending' | 'approved' | 'rejected';
+  loanStatus?: "pending" | "approved" | "rejected";
 }
 
-export const LoanApplicationForm = ({ walletAddress }: LoanApplicationFormProps) => {
+export const LoanApplicationForm = ({
+  walletAddress,
+}: LoanApplicationFormProps) => {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const [loanData, setLoanData] = useState<LoanData>({
     accountId: walletAddress,
-    name: '',
-    cibil: '',
-    requestedAmount: '',
+    name: "",
+    cibil: "",
+    requestedAmount: "",
   });
+  const [collPath, setCollPath] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   const handleInputChange = (field: keyof LoanData, value: string) => {
-    setLoanData(prev => ({ ...prev, [field]: value }));
+    setLoanData((prev) => ({ ...prev, [field]: value }));
   };
 
   const submitPersonalDetails = async () => {
@@ -49,14 +58,16 @@ export const LoanApplicationForm = ({ walletAddress }: LoanApplicationFormProps)
     }
 
     setIsLoading(true);
-    
+
     // Simulate API call to get maximum loan amount
     setTimeout(() => {
-      const maxLoan = Math.floor(parseInt(loanData.cibil) * 100 + Math.random() * 50000);
-      setLoanData(prev => ({ ...prev, maxLoanAmount: maxLoan }));
+      const maxLoan = Math.floor(
+        parseInt(loanData.cibil) * 100 + Math.random() * 50000
+      );
+      setLoanData((prev) => ({ ...prev, maxLoanAmount: maxLoan }));
       setCurrentStep(2);
       setIsLoading(false);
-      
+
       toast({
         title: "Eligibility Calculated",
         description: `Your maximum loan amount: $${maxLoan.toLocaleString()}`,
@@ -85,14 +96,14 @@ export const LoanApplicationForm = ({ walletAddress }: LoanApplicationFormProps)
     }
 
     setIsLoading(true);
-    
+
     // Simulate API call to calculate minimum collateral
     setTimeout(() => {
       const minCollateral = requested * 1.5; // 150% collateral requirement
-      setLoanData(prev => ({ ...prev, minimumCollateral: minCollateral }));
+      setLoanData((prev) => ({ ...prev, minimumCollateral: minCollateral }));
       setCurrentStep(3);
       setIsLoading(false);
-      
+
       toast({
         title: "Collateral Requirement",
         description: `Minimum collateral: $${minCollateral.toLocaleString()}`,
@@ -118,28 +129,59 @@ export const LoanApplicationForm = ({ walletAddress }: LoanApplicationFormProps)
     }
 
     setIsLoading(true);
-    
+
     // Simulate API call for collateral evaluation
-    setTimeout(() => {
-      const collateralValue = Math.floor((loanData.minimumCollateral || 0) * (0.8 + Math.random() * 0.4));
-      const isApproved = collateralValue >= (loanData.minimumCollateral || 0);
-      
-      setLoanData(prev => ({ 
-        ...prev, 
-        collateralValue,
-        loanStatus: isApproved ? 'approved' : 'rejected'
-      }));
-      setCurrentStep(4);
-      setIsLoading(false);
-      
-      toast({
-        title: isApproved ? "Loan Approved!" : "Insufficient Collateral",
-        description: isApproved 
-          ? "Your loan has been approved and will be distributed shortly"
-          : "Collateral value is below minimum requirement",
-        variant: isApproved ? "default" : "destructive",
+    const collateralValue = Math.floor(
+      (loanData.minimumCollateral || 0) * (0.8 + Math.random() * 0.4)
+    );
+    const isApproved = collateralValue >= (loanData.minimumCollateral || 0);
+
+    setLoanData((prev) => ({
+      ...prev,
+      collateralValue,
+      loanStatus: isApproved ? "approved" : "rejected",
+    }));
+
+    const payload = {
+      pid: loanData.accountId,
+      user: loanData.name,
+      amt: loanData.requestedAmount,
+      cibil: loanData.cibil,
+      path: collPath,
+    };
+
+    try {
+      const response = await fetch("http://localhost:3000/api/db", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ payload }),
       });
-    }, 3000);
+      const data = await response.json();
+      if (response.ok) {
+        toast({
+          title: "Login Successful",
+          description: "Welcome back! You have been logged in.",
+        });
+        localStorage.setItem("token", `Bearer ` + data.token); // storing the jwt locally with the bearer prefix for middleware
+      } else {
+        throw new Error(data.message || "Invalid credentials.");
+      }
+    } catch (err) {
+      console.error("Error while updating the user database:", err);
+    }
+
+    setCurrentStep(4);
+    setIsLoading(false);
+
+    toast({
+      title: isApproved ? "Loan Approved!" : "Insufficient Collateral",
+      description: isApproved
+        ? "Your loan has been approved and will be distributed shortly"
+        : "Collateral value is below minimum requirement",
+      variant: isApproved ? "default" : "destructive",
+    });
   };
 
   return (
@@ -151,8 +193,8 @@ export const LoanApplicationForm = ({ walletAddress }: LoanApplicationFormProps)
             <div
               className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold ${
                 step <= currentStep
-                  ? 'bg-gradient-primary text-primary-foreground'
-                  : 'bg-muted text-muted-foreground'
+                  ? "bg-gradient-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground"
               }`}
             >
               {step}
@@ -160,7 +202,7 @@ export const LoanApplicationForm = ({ walletAddress }: LoanApplicationFormProps)
             {step < 4 && (
               <div
                 className={`h-0.5 w-16 ${
-                  step < currentStep ? 'bg-primary' : 'bg-muted'
+                  step < currentStep ? "bg-primary" : "bg-muted"
                 }`}
               />
             )}
@@ -196,7 +238,7 @@ export const LoanApplicationForm = ({ walletAddress }: LoanApplicationFormProps)
                 id="name"
                 placeholder="Enter your full name"
                 value={loanData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
+                onChange={(e) => handleInputChange("name", e.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -206,7 +248,7 @@ export const LoanApplicationForm = ({ walletAddress }: LoanApplicationFormProps)
                 type="number"
                 placeholder="Enter your CIBIL score (300-850)"
                 value={loanData.cibil}
-                onChange={(e) => handleInputChange('cibil', e.target.value)}
+                onChange={(e) => handleInputChange("cibil", e.target.value)}
                 min="300"
                 max="850"
               />
@@ -223,7 +265,7 @@ export const LoanApplicationForm = ({ walletAddress }: LoanApplicationFormProps)
                   Calculating Eligibility...
                 </>
               ) : (
-                'Check Eligibility'
+                "Check Eligibility"
               )}
             </Button>
           </CardContent>
@@ -239,7 +281,8 @@ export const LoanApplicationForm = ({ walletAddress }: LoanApplicationFormProps)
               Loan Amount
             </CardTitle>
             <CardDescription>
-              You're eligible for up to ${loanData.maxLoanAmount?.toLocaleString()}
+              You're eligible for up to $
+              {loanData.maxLoanAmount?.toLocaleString()}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -253,7 +296,9 @@ export const LoanApplicationForm = ({ walletAddress }: LoanApplicationFormProps)
                 type="number"
                 placeholder={`Enter amount (max: ${loanData.maxLoanAmount})`}
                 value={loanData.requestedAmount}
-                onChange={(e) => handleInputChange('requestedAmount', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("requestedAmount", e.target.value)
+                }
                 max={loanData.maxLoanAmount}
               />
             </div>
@@ -269,7 +314,7 @@ export const LoanApplicationForm = ({ walletAddress }: LoanApplicationFormProps)
                   Calculating Collateral...
                 </>
               ) : (
-                'Apply for Loan'
+                "Apply for Loan"
               )}
             </Button>
           </CardContent>
@@ -286,12 +331,14 @@ export const LoanApplicationForm = ({ walletAddress }: LoanApplicationFormProps)
                 Collateral Document
               </CardTitle>
               <CardDescription>
-                Upload documentation for your collateral worth at least ${loanData.minimumCollateral?.toLocaleString()}
+                Upload documentation for your collateral worth at least $
+                {loanData.minimumCollateral?.toLocaleString()}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <Badge variant="warning" className="mb-4">
-                Minimum Collateral Required: ${loanData.minimumCollateral?.toLocaleString()}
+                Minimum Collateral Required: $
+                {loanData.minimumCollateral?.toLocaleString()}
               </Badge>
               <div className="space-y-2">
                 <Label htmlFor="collateral">Collateral Document</Label>
@@ -325,7 +372,7 @@ export const LoanApplicationForm = ({ walletAddress }: LoanApplicationFormProps)
                     Evaluating Collateral...
                   </>
                 ) : (
-                  'Submit Collateral'
+                  "Submit Collateral"
                 )}
               </Button>
             </CardContent>
@@ -342,48 +389,75 @@ export const LoanApplicationForm = ({ walletAddress }: LoanApplicationFormProps)
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-4 bg-gradient-primary/10 rounded-lg border border-primary/20">
-                  <p className="text-sm font-medium text-muted-foreground">Interest Rate</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Interest Rate
+                  </p>
                   <p className="text-2xl font-bold text-primary">8.5%</p>
                   <p className="text-xs text-muted-foreground">Annual Rate</p>
                 </div>
                 <div className="p-4 bg-gradient-primary/10 rounded-lg border border-primary/20">
-                  <p className="text-sm font-medium text-muted-foreground">Loan Term</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Loan Term
+                  </p>
                   <p className="text-2xl font-bold text-primary">24</p>
                   <p className="text-xs text-muted-foreground">Months</p>
                 </div>
                 <div className="p-4 bg-gradient-primary/10 rounded-lg border border-primary/20">
-                  <p className="text-sm font-medium text-muted-foreground">Monthly EMI</p>
-                  <p className="text-2xl font-bold text-primary">${Math.round((parseInt(loanData.requestedAmount) * 1.085) / 24).toLocaleString()}</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Monthly EMI
+                  </p>
+                  <p className="text-2xl font-bold text-primary">
+                    $
+                    {Math.round(
+                      (parseInt(loanData.requestedAmount) * 1.085) / 24
+                    ).toLocaleString()}
+                  </p>
                   <p className="text-xs text-muted-foreground">Fixed Amount</p>
                 </div>
                 <div className="p-4 bg-gradient-primary/10 rounded-lg border border-primary/20">
-                  <p className="text-sm font-medium text-muted-foreground">Total EMIs</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Total EMIs
+                  </p>
                   <p className="text-2xl font-bold text-primary">24</p>
                   <p className="text-xs text-muted-foreground">Payments</p>
                 </div>
               </div>
-              
+
               <div className="mt-6 p-4 bg-accent rounded-lg">
                 <h4 className="font-semibold mb-3">Repayment Summary</h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span>Principal Amount:</span>
-                    <span className="font-medium">${parseInt(loanData.requestedAmount).toLocaleString()}</span>
+                    <span className="font-medium">
+                      ${parseInt(loanData.requestedAmount).toLocaleString()}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Total Interest:</span>
-                    <span className="font-medium">${Math.round(parseInt(loanData.requestedAmount) * 0.085).toLocaleString()}</span>
+                    <span className="font-medium">
+                      $
+                      {Math.round(
+                        parseInt(loanData.requestedAmount) * 0.085
+                      ).toLocaleString()}
+                    </span>
                   </div>
                   <div className="flex justify-between border-t border-border pt-2">
                     <span className="font-semibold">Total Repayment:</span>
-                    <span className="font-semibold">${Math.round(parseInt(loanData.requestedAmount) * 1.085).toLocaleString()}</span>
+                    <span className="font-semibold">
+                      $
+                      {Math.round(
+                        parseInt(loanData.requestedAmount) * 1.085
+                      ).toLocaleString()}
+                    </span>
                   </div>
                 </div>
               </div>
 
               <div className="mt-4 p-3 bg-info/10 border border-info/20 rounded-lg">
                 <p className="text-sm text-info-foreground">
-                  <strong>Important:</strong> Missing 3 consecutive EMI payments may result in collateral liquidation as per smart contract terms.
+                  <strong>Important:</strong> Missing 3 consecutive EMI payments
+                  may result in collateral liquidation as per smart contract
+                  terms.
                 </p>
               </div>
             </CardContent>
@@ -403,30 +477,133 @@ export const LoanApplicationForm = ({ walletAddress }: LoanApplicationFormProps)
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-accent rounded-lg">
-                <p className="text-sm text-muted-foreground">Requested Amount</p>
-                <p className="text-xl font-semibold">${loanData.requestedAmount}</p>
+                <p className="text-sm text-muted-foreground">
+                  Requested Amount
+                </p>
+                <p className="text-xl font-semibold">
+                  ${loanData.requestedAmount}
+                </p>
               </div>
               <div className="p-4 bg-accent rounded-lg">
-                <p className="text-sm text-muted-foreground">Collateral Value</p>
-                <p className="text-xl font-semibold">${loanData.collateralValue?.toLocaleString()}</p>
+                <p className="text-sm text-muted-foreground">
+                  Collateral Value
+                </p>
+                <p className="text-xl font-semibold">
+                  ${loanData.collateralValue?.toLocaleString()}
+                </p>
               </div>
             </div>
-            
+
             <div className="text-center py-6">
-              <Badge 
-                variant={loanData.loanStatus === 'approved' ? 'success' : 'destructive'}
+              <Badge
+                variant={
+                  loanData.loanStatus === "approved" ? "success" : "destructive"
+                }
                 className="text-lg px-6 py-3"
               >
-                {loanData.loanStatus === 'approved' ? '✅ LOAN APPROVED' : '❌ LOAN REJECTED'}
+                {loanData.loanStatus === "approved"
+                  ? "✅ LOAN APPROVED"
+                  : "❌ LOAN REJECTED"}
               </Badge>
               <p className="mt-4 text-muted-foreground">
-                {loanData.loanStatus === 'approved'
-                  ? 'Your loan has been approved and will be distributed to your wallet shortly.'
-                  : 'Your collateral value is insufficient. Please provide additional collateral or reduce the loan amount.'}
+                {loanData.loanStatus === "approved"
+                  ? "Your loan has been approved and will be distributed to your wallet shortly."
+                  : "Your collateral value is insufficient. Please provide additional collateral or reduce the loan amount."}
               </p>
             </div>
 
-            {loanData.loanStatus === 'approved' && (
+            {loanData.loanStatus === "approved" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-xl">
+                    Loan Repayment Terms
+                  </CardTitle>
+                  <CardDescription>
+                    Review the repayment schedule and terms for your loan
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="p-4 bg-gradient-primary/10 rounded-lg border border-primary/20">
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Interest Rate
+                      </p>
+                      <p className="text-2xl font-bold text-primary">8.5%</p>
+                      <p className="text-xs text-muted-foreground">
+                        Annual Rate
+                      </p>
+                    </div>
+                    <div className="p-4 bg-gradient-primary/10 rounded-lg border border-primary/20">
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Loan Term
+                      </p>
+                      <p className="text-2xl font-bold text-primary">24</p>
+                      <p className="text-xs text-muted-foreground">Months</p>
+                    </div>
+                    <div className="p-4 bg-gradient-primary/10 rounded-lg border border-primary/20">
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Monthly EMI
+                      </p>
+                      <p className="text-2xl font-bold text-primary">
+                        $
+                        {Math.round(
+                          (parseInt(loanData.requestedAmount) * 1.085) / 24
+                        ).toLocaleString()}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Fixed Amount
+                      </p>
+                    </div>
+                    <div className="p-4 bg-gradient-primary/10 rounded-lg border border-primary/20">
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Total EMIs
+                      </p>
+                      <p className="text-2xl font-bold text-primary">24</p>
+                      <p className="text-xs text-muted-foreground">Payments</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 p-4 bg-accent rounded-lg">
+                    <h4 className="font-semibold mb-3">Repayment Summary</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>Principal Amount:</span>
+                        <span className="font-medium">
+                          ${parseInt(loanData.requestedAmount).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Total Interest:</span>
+                        <span className="font-medium">
+                          $
+                          {Math.round(
+                            parseInt(loanData.requestedAmount) * 0.085
+                          ).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between border-t border-border pt-2">
+                        <span className="font-semibold">Total Repayment:</span>
+                        <span className="font-semibold">
+                          $
+                          {Math.round(
+                            parseInt(loanData.requestedAmount) * 1.085
+                          ).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 p-3 bg-info/10 border border-info/20 rounded-lg">
+                    <p className="text-sm text-info-foreground">
+                      <strong>Important:</strong> Missing 3 consecutive EMI
+                      payments may result in collateral liquidation as per smart
+                      contract terms.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            {loanData.loanStatus === "approved" && (
               <div className="p-4 bg-gradient-success rounded-lg text-success-foreground">
                 <h4 className="font-semibold mb-2">Next Steps:</h4>
                 <ul className="text-sm space-y-1">

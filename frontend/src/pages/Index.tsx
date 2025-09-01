@@ -8,7 +8,10 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
+      {/*
+       Hero Section 
+      @dev random shit
+      */}
       <div className="relative overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
@@ -43,7 +46,7 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Dashboard Section */}
+      {/* Dashboard Section, data from database will be used here. */}
       <div className="bg-card py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -72,6 +75,7 @@ const Index = () => {
                 </tr>
               </thead>
               <tbody>
+                {/* @dev Add the data from database here to create cells*/}
                 <tr className="border-b border-border/50">
                   <td className="p-4 font-mono text-sm">0x742d...7A9B</td>
                   <td className="p-4">$12,500 ETH</td>
@@ -137,7 +141,7 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Features Section */}
+      {/* Features Section or FOOTER*/}
       <div className="bg-gradient-secondary py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
