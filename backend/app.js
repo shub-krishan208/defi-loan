@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { viewLedger, addEntry, findUser } from "./db";
+import { viewLedger, addEntry, findUser, updateDues } from "./db";
 import router from "./router";
 
 const app = express();

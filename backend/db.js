@@ -11,6 +11,8 @@ const createTable = db.prepare(`
         amount_approved INTEGER NOT NULL,
         cibil INTEGER NOT NULL,
         coll_path TEXT NOT NULL
+        failures INTEGER,
+        next_date TEXT
     );
 `);
 
@@ -33,10 +35,19 @@ function findColl(path) {
 
 function addEntry(pid, user, amt, cibil, path) {
   const stmt = db.prepare(
-    `INSERT INTO users (public_address, username, amoutn_approved, cibil, coll_path) VALUES (?,?,?,?,?)`
+    `INSERT INTO ledger (public_address, username, amoutn_approved, cibil, coll_path) VALUES (?,?,?,?,?)`
   );
   const info = stmt.run(pid, user, amt, cibil, path);
   console.log(`New Loan added with loan id "${info.lastInsertRowid}"`);
 }
 
-export { findUser, addEntry, viewLedger };
+function updateDues(date, id) {
+  const stmt = db.prepare(`
+    UPDATE ledger
+    SET next_date = ?
+    WHERE id = ?`);
+  const info = stmt.run(date, id);
+  console.log(`Update date-time: ${info.changes}`);
+}
+
+export { findUser, addEntry, viewLedger, updateDues };
