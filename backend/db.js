@@ -18,7 +18,7 @@ const createTable = db.prepare(`
         remaining_dues INTEGER NOT NULL,
         date_created INTEGER NOT NULL,
         next_due INTEGER NOT NULL,
-        failures INTEGER DEFAULT 0,
+        failures INTEGER DEFAULT 0
     );
 `);
 
