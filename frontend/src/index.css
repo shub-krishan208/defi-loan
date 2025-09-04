@@ -37,26 +37,48 @@ All colors MUST be HSL.
     --ring: 217 91% 60%;
 
     --radius: 0.75rem;
-    
+
     /* DeFi Design System - Blue Theme */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(240 100% 70%));
-    --gradient-secondary: linear-gradient(135deg, hsl(220 25% 8%), hsl(220 30% 15%));
-    --gradient-success: linear-gradient(135deg, hsl(142 70% 45%), hsl(160 75% 50%));
-    --gradient-hero: linear-gradient(135deg, hsl(220 25% 8%) 0%, hsl(220 30% 15%) 50%, hsl(217 32% 20%) 100%);
-    --gradient-text: linear-gradient(135deg, hsl(217 91% 60%), hsl(240 100% 80%), hsl(260 100% 70%));
-    
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(217 91% 60%),
+      hsl(240 100% 70%)
+    );
+    --gradient-secondary: linear-gradient(
+      135deg,
+      hsl(220 25% 8%),
+      hsl(220 30% 15%)
+    );
+    --gradient-success: linear-gradient(
+      135deg,
+      hsl(142 70% 45%),
+      hsl(160 75% 50%)
+    );
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(220 25% 8%) 0%,
+      hsl(220 30% 15%) 50%,
+      hsl(217 32% 20%) 100%
+    );
+    --gradient-text: linear-gradient(
+      135deg,
+      hsl(217 91% 60%),
+      hsl(240 100% 80%),
+      hsl(260 100% 70%)
+    );
+
     --success: 142 76% 36%;
     --success-foreground: 210 40% 98%;
-    
+
     --warning: 38 92% 50%;
     --warning-foreground: 220 15% 5%;
-    
+
     --info: 217 91% 60%;
     --info-foreground: 210 40% 98%;
-    
+
     --shadow-glow: 0 0 30px hsl(217 91% 60% / 0.4);
     --shadow-card: 0 10px 30px -5px hsl(220 15% 5% / 0.8);
-    
+
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --sidebar-background: 0 0% 98%;

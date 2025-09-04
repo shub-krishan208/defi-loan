@@ -10,14 +10,14 @@ const createTable = db.prepare(`
         username TEXT NOT NULL,
         cibil INTEGER NOT NULL,
         amount_approved INTEGER NOT NULL,
-        coll_path TEXT NOT NULL
+        coll_path TEXT NOT NULL,
         token_id TEXT DEFAULT '0x1234...abc',
         interest REAL DEFAULT 8.5,
         repayment_term INTEGER DEFAULT 12,
         emi INTEGER NOT NULL,
         remaining_dues INTEGER NOT NULL,
         date_created INTEGER NOT NULL,
-        next_due INTEGER NOT NULL,
+        next_date INTEGER NOT NULL,
         failures INTEGER DEFAULT 0
     );
 `);

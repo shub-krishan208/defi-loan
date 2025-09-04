@@ -5,11 +5,13 @@ import fs from "fs";
 import cors from "cors";
 import { viewLedger, findUser, updateDues, addColl } from "./db.js";
 import router from "./routes.js";
+import { defaultUser } from "./auth/user.js";
 
 const app = express();
-const PORT = 5000;
+const PORT = 5001;
 
 app.use(cors({ origin: ["http://localhost:8080"] }));
+
 /*
  * Works to be done by the backend
  * @db-fr 1. Add a new user to the @db
@@ -27,9 +29,7 @@ app.use(cors({ origin: ["http://localhost:8080"] }));
  * @sc-bk 14. Ownership transfer of collateral from lender to borrower @smart-contract
  */
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+defaultUser();
 
 //middleware to handle frontend requests
 app.use("/api/", router);
@@ -83,3 +83,7 @@ app.post("/upload", upload.single("file"), (req, res) => {
 // some way to verify the collateral
 
 //assuming collateral is validated: smart contract calls
+
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});

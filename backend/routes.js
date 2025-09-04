@@ -1,7 +1,14 @@
 import express from "express";
 import { makeUser, addColl, viewLedger, findUser } from "./db.js";
+import { login } from "./auth/authController.js";
+import { guard } from "./auth/guard.js";
 
 const router = express.Router();
+
+// auth routes
+
+router.post("/login", login);
+router.get("/check", guard);
 
 // add new user
 router.post("/db/new", async (req, res) => {

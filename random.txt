@@ -1,0 +1,53 @@
+setup hardhat and try deploying contracts to the local blockchain
+- make a deploy script for the two contracts
+-
+
+once that is done, setup api calls for smartcontract functions and make a controller middleware to handle relevant requests.
+
+Data provided by the user:
+- wallet address (metamask of the user) *13
+- name *1
+- cibil *2
+**process eligibility**
+- requested amount *3
+- collDoc *4
+--> backend provided data to be stored with the user:
+    - loanID *5
+    - interest rate *6
+    - repayment terms *7
+    - monthly emi *8
+    - tokenID *9
+    - number of defaults *11
+    - next due date *12
+    - date of loan issued *10 {handling dates as integers (will fromat them while processing)}
+
+    structure of db:
+    1. loanID
+    2. wallet_address
+    3. name
+    4. cibil
+    5. amount_approved
+    6. collDoc
+    7. tokenID
+    8. interest
+    9. repayment_term
+    10. emi
+    11. remaining_dues
+    12. date_created
+    13. next_date
+    14. failures
+
+how is the database created:
+    1. wallet + name + cibil => first step: goes to evaluation
+    2. gives requested amount, collateral evaluation takes place => add the rest of the information (make 2 functions, one for info update and other for collPath addition)
+    3. EDITABLE data: remaining_dues, next_date, failures
+
+
+Check for SQL injection at the frontend.
+
+
+NEED TO GET ERROR CHECKS IN THE DATABASE FUNCTION CALLS FOR THE FRONTEND
+
+Repayment cannot be done automatically, we need to make a user dashboard so that the user can do the payments at apt time. (There will be notifications for when the loan is due).
+
+Upload the file on IPFS and generate a NFT using palak's SC functions to check if it is working or not.
