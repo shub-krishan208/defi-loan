@@ -15,13 +15,13 @@ async function main() {
   const loansystem = await LoanSystem.deploy(mtAdd);
   await loansystem.waitForDeployment();
 
-  console.log(
-    "Loan System contract deployed to: ",
-    await loansystem.getAddress()
-  );
+  const conAdd = await loansystem.getAddress();
+  console.log("Loan System contract deployed to: ", conAdd);
 }
 
 main().catch((err) => {
   console.error(err);
   process.exitCode = 1;
 });
+
+export { mtAdd, conAdd };
