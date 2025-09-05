@@ -4,7 +4,8 @@ import { findUser } from "./user.js";
 
 const login = async (req, res) => {
   const { username, password } = req.body;
-
+  const JWT_SECRET =
+    "a_very_long_string_that_is_supposed_to_be_a_super_secret_for_JWT_encryption";
   try {
     const admin = findUser(username);
     if (!admin) {
@@ -19,7 +20,7 @@ const login = async (req, res) => {
       id: admin.id,
       username: admin.username,
     };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+    const token = jwt.sign(payload, JWT_SECRET, {
       expiresIn: "3h", //token expires in 3h
     });
 

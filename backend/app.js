@@ -10,6 +10,7 @@ import { defaultUser } from "./auth/user.js";
 const app = express();
 const PORT = 5001;
 
+app.use(express.json());
 app.use(cors({ origin: ["http://localhost:8080"] }));
 
 /*
@@ -30,6 +31,10 @@ app.use(cors({ origin: ["http://localhost:8080"] }));
  */
 
 defaultUser();
+
+app.get("/", (req, res) => {
+  res.send("The backend is alive!");
+});
 
 //middleware to handle frontend requests
 app.use("/api/", router);

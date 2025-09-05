@@ -3,37 +3,68 @@ import { Button } from "@/components/ui/button";
 import { useNavigate, Link } from "react-router-dom";
 import { Signup } from "./Signup";
 
-export const Login: React.FC = () => {
+import { useToast } from "@/hooks/use-toast";
+
+type LoginProps = {
+  isLoggedIn: boolean;
+  setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+const Login: React.FC<LoginProps> = ({ isLoggedIn, setIsLoggedIn }) => {
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const handleLogin = async () => {
-    const res = await fetch("http://localhost:5001", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    const authToken = localStorage.getItem("authToken");
+    if (!authToken && !isLoggedIn) {
+      const res = await fetch("http://localhost:5001/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: email, password: password }),
+      });
 
-    if (!res.ok) {
-      let errMsg = "Invalid credentials";
-      try {
-        const errData = await res.json();
-        errMsg = errData.message || errMsg;
-      } catch {}
-      throw new Error(errMsg);
+      if (!res.ok) {
+        let errMsg = "Invalid credentials";
+        try {
+          const errData = await res.json();
+          errMsg = errData.message || errMsg;
+          console.error("server response: ", errMsg);
+        } catch (err) {
+          console.error("Error while logging in: ", err);
+        }
+        throw new Error(errMsg);
+      }
+
+      const data = await res.json();
+      localStorage.setItem("authToken", data.token);
+      toast({
+        title: "Login Successful",
+        description: "Welcome back! You have been logged in.",
+      });
+      console.log("User logged in Successfully!");
+      setIsLoggedIn(true);
+      return isLoggedIn;
     }
 
-    const data = await res.json();
-    localStorage.setItem("authToken", data.token);
-    return data;
+    if (authToken.startsWith("Bearer")) {
+      toast({
+        title: "Logged in Session.",
+        description: "You're already logged in!",
+      });
+      console.log("User already logged in!");
+      setIsLoggedIn(true);
+      return isLoggedIn;
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: integrate with backend login
     handleLogin();
-    console.log("Logging in:", { email, password });
+    if (localStorage.getItem("authToken")) {
+      navigate("/");
+    }
   };
 
   return (
@@ -110,3 +141,5 @@ export const Login: React.FC = () => {
     </div>
   );
 };
+
+export { Login };

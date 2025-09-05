@@ -3,7 +3,7 @@ import { WalletConnect } from "@/components/WalletConnect";
 import { LoanApplicationForm } from "@/components/LoanApplicationForm";
 import heroImage from "@/assets/defi-hero.jpg";
 
-const Index = () => {
+const Index = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
 
   return (
@@ -117,25 +117,38 @@ const Index = () => {
       {/* Main Application */}
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
-          {!walletAddress ? (
-            <div className="space-y-8">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold mb-4">Get Started</h2>
-                <p className="text-muted-foreground">
-                  Connect your wallet to begin the loan application process
-                </p>
+          {isLoggedIn ? (
+            !walletAddress ? (
+              <div className="space-y-8">
+                <div className="text-center mb-8">
+                  <h2 className="text-3xl font-bold mb-4">Get Started</h2>
+                  <p className="text-muted-foreground">
+                    Connect your wallet to begin the loan application process
+                  </p>
+                </div>
+                <WalletConnect onWalletConnected={setWalletAddress} />
               </div>
-              <WalletConnect onWalletConnected={setWalletAddress} />
-            </div>
+            ) : (
+              <div className="space-y-8">
+                <div className="text-center mb-8">
+                  <h2 className="text-3xl font-bold mb-4">Loan Application</h2>
+                  <p className="text-muted-foreground">
+                    Complete the steps below to apply for your loan
+                  </p>
+                </div>
+                <LoanApplicationForm walletAddress={walletAddress} />
+              </div>
+            )
           ) : (
             <div className="space-y-8">
               <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold mb-4">Loan Application</h2>
+                <h2 className="text-3xl font-bold mb-4">
+                  You're Not Logged in!
+                </h2>
                 <p className="text-muted-foreground">
-                  Complete the steps below to apply for your loan
+                  First Login/Signup to continue ...
                 </p>
               </div>
-              <LoanApplicationForm walletAddress={walletAddress} />
             </div>
           )}
         </div>

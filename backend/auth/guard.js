@@ -4,7 +4,8 @@ import { findUserByID } from "./user.js";
 // the req, res and next function to execute, as args
 const guard = async (req, res, next) => {
   let token;
-
+  const JWT_SECRET =
+    "a_very_long_string_that_is_supposed_to_be_a_super_secret_for_JWT_encryption";
   // request header must have a token type of 'Bearer'
   if (
     req.headers.authorization &&
@@ -14,7 +15,7 @@ const guard = async (req, res, next) => {
       // initialize the token as the immediate next string after 'Bearer', separated by ' '
       token = req.headers.authorization.split(" ")[1];
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, JWT_SECRET);
 
       // assign the admin id (pk) to the req as designed in the tokne (it has both id and password)
       req.admin = findUserByID(decoded.id);
