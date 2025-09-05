@@ -1,4 +1,7 @@
 const ethers = require("hardhat").ethers;
+
+let mtAdd, conAdd;
+
 async function main() {
   const [deployer] = await ethers.getSigners(); // returns the first account from the list of  hardhat accounts (if run on localhost network)
 
@@ -8,14 +11,14 @@ async function main() {
   const mytoken = await MyToken.deploy(deployer.address);
   await mytoken.waitForDeployment();
 
-  const mtAdd = await mytoken.getAddress();
+  mtAdd = await mytoken.getAddress();
   console.log("Token deployed to: ", mtAdd);
 
   const LoanSystem = await ethers.getContractFactory("LoanSystem");
   const loansystem = await LoanSystem.deploy(mtAdd);
   await loansystem.waitForDeployment();
 
-  const conAdd = await loansystem.getAddress();
+  conAdd = await loansystem.getAddress();
   console.log("Loan System contract deployed to: ", conAdd);
 }
 
@@ -24,4 +27,4 @@ main().catch((err) => {
   process.exitCode = 1;
 });
 
-export { mtAdd, conAdd };
+module.exports = { mtAdd, conAdd };
